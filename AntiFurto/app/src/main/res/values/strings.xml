@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">Phone Recovery</string>
+    <string name="act_contatos">Friends Phones</string>
+    <string name="act_cad_contatos">Cadastrar Friends</string>
+
+    <string name="lorem_ipsum">
+        <p>
+            Phone Recovery é um aplicativo voltado para localizar o celular perdido ou furtado através do envio de códigos pré
+            definidos de outro celular para o celular furtado ou perdido.\n
+        </p>
+        <p>
+            Quando o celular recebe a mensagem ele renponde de acordo com o código recebido através de mensagem.\n\n\n\n
+        </p>
+        <p>
+            Este projeto foi desenvolvido por Breno Luan Rocha Lima e Erveny Santiago de Oliveira na cadeira de Estágio III do
+            curso de Sistema de Informação do Centro Universitário Sete de Setembro.
+            Repositório do projeto
+        </p>
+
+    </string>
+
+    <string name="ln_Nome">Nome</string>
+    <string name="lb_Telefone">Telefone</string>
+    <string name="txt_CadFP">Cadastrar Friends Phone</string>
+
+    <string name="lbl_salvar">Salvar</string>
+    <string name="lbl_alterar">Alterar</string>
+    <string name="lbl_excluir">Excluir</string>
+    <string name="friends_phones">Friends Phones</string>
+    <string name="lb_email">E-mail</string>
+    <string name="password">Password</string>
+
+</resources>
