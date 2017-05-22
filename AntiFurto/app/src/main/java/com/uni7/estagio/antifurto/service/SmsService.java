@@ -24,6 +24,7 @@ public class SmsService extends Service {
     SmsManager smsManager;
     String telefone;
     String mensagem;
+    static final String textoPadrao = "Recovery Phone \n";
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -40,11 +41,7 @@ public class SmsService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         telefone = intent.getStringExtra("telefone");
-        mensagem = intent.getStringExtra("texto");
-
-        Log.i("Telefone SMS", telefone);
-        Log.i("Mensagem SMS", mensagem);
-        SmsManager smsManager = SmsManager.getDefault();
+        mensagem = textoPadrao + intent.getStringExtra("texto");
         sendTextSms(telefone, mensagem);
 
         return super.onStartCommand(intent, flags, startId);
@@ -52,9 +49,10 @@ public class SmsService extends Service {
 
 
     public void sendTextSms(String telefone, String texto){
-
+        Log.i("Telefone SMS", telefone);
+        Log.i("Mensagem SMS", texto);
        smsManager = SmsManager.getDefault();
-       smsManager.sendMultipartTextMessage(telefone, null, smsManager.divideMessage(texto), null, null);
+       smsManager.sendTextMessage(telefone, null, texto, null, null);
 
     }
 

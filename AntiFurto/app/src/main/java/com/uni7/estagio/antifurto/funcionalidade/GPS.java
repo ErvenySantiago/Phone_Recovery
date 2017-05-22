@@ -162,6 +162,11 @@ public class GPS extends Service implements LocationListener {
         return longitude;
     }
 
+    public String toString(){
+        return "Latitude: " + getLatitude() + " Longitude: " + getLongitude();
+
+    }
+
     /**
      * Function to check GPS/wifi enabled
      * @return boolean

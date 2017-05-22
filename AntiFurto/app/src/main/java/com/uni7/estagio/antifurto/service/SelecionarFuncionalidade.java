@@ -3,13 +3,17 @@ package com.uni7.estagio.antifurto.service;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.uni7.estagio.antifurto.database.DataBase;
+import com.uni7.estagio.antifurto.dominio.RepositorioContato;
 import com.uni7.estagio.antifurto.funcionalidade.AudioRecorder;
 import com.uni7.estagio.antifurto.funcionalidade.GPS;
+import com.uni7.estagio.antifurto.funcionalidade.InformacaoAparelho;
 
 
 /**
@@ -19,7 +23,11 @@ import com.uni7.estagio.antifurto.funcionalidade.GPS;
 public class SelecionarFuncionalidade extends Service {
     String telefone;
     String mensagem;
+    String smsTexto;
     Context context;
+    private DataBase dataBase;
+    private SQLiteDatabase conn;
+    private RepositorioContato repositorioContato;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -27,49 +35,60 @@ public class SelecionarFuncionalidade extends Service {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        dataBase = new DataBase(this);
+        conn = dataBase.getReadableDatabase();
+
+        repositorioContato = new RepositorioContato(conn);
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         context = getApplicationContext();
         telefone = intent.getStringExtra("telefone");
         mensagem = intent.getStringExtra("mensagem");
+        smsTexto = "PROBLEMAS EM ECONTRAR LOCALIZAÇÃO! TENTE NOVAMENTE";
         Log.i("Telefone Selecionar", telefone);
         Log.i("Mensagem Selecionar", mensagem);
+        Boolean teste = repositorioContato.existe(telefone);
+        Log.i("EXISTE", teste.toString());
+        if(repositorioContato.existe(telefone)) {
 
-        if(mensagem.equals("1")){
-            GPS gps = new GPS(context);
-            Double latitude;
-            Double longitude;
-            String texto = "PROBLEMAS EM ECONTRAR LOCALIZAÇÃO! TENTE NOVAMENTE";
-            if (gps.canGetLocation()) {
-                latitude = gps.getLatitude();
-                longitude = gps.getLongitude();
-                texto = "Latitude: " + gps.getLatitude();
-                texto += " Longitude: " + gps.getLongitude();
+            if (mensagem.equals("1")) {
+                GPS gps = new GPS(context);
+                if (gps.canGetLocation()) {
+                    smsTexto = gps.toString();
+                }
+                Intent it = new Intent("SEND_SMS");
+                it.putExtra("telefone", telefone);
+                it.putExtra("texto", smsTexto);
+                startService(it);
+            } else if (mensagem.equals("2")) {
+                AudioRecorder audio = new AudioRecorder();
+                audio.gravar();
+                String email = repositorioContato.findByTelefone(telefone).getEmail();
+                Intent it = new Intent("SEND_EMAIL");
+                it.putExtra("email", email);
+                it.putExtra("anexo", audio.mFileName);
+                context.startService(it);
+            } else if (mensagem.equals("3")) {
+                InformacaoAparelho inforAparelho = new InformacaoAparelho(context);
+                smsTexto = "ID Aparelho: ";
+                smsTexto += inforAparelho.getIMEI();
+                Intent it = new Intent("SEND_SMS");
+                it.putExtra("telefone",telefone);
+                it.putExtra("texto",smsTexto);
+                startService(it);
+            } else {
+                Log.i("Telefone", telefone);
+                Log.i("Mensagem", mensagem);
+                Log.i("Funcionalidade", "Nenhuma funcionalidade encontrada!");
+                Intent it = new Intent("SEND_SMS");
+                it.putExtra("telefone", telefone);
+                it.putExtra("texto", "Funcionalidade não encontrada!");
+                startService(it);
             }
-            Intent it = new Intent("SEND_SMS");
-            it.putExtra("telefone",telefone);
-            it.putExtra("texto",texto);
-            startService(it);
-        }else if(mensagem.equals("2")){
-            AudioRecorder audio = new AudioRecorder();
-            audio.gravar();
-            Intent it = new Intent("SEND_EMAIL");
-            it.putExtra("anexo",audio.mFileName);
-            context.startService(it);
-        }else if(mensagem.equals("3")){
-            String imei;
-            TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            imei = tm.getDeviceId();
-            Intent it = new Intent("SEND_SMS");
-            it.putExtra("telefone",telefone);
-            it.putExtra("texto",imei);
-            startService(it);
-        }else{
-            Log.i("Telefone", telefone);
-            Log.i("Mensagem", mensagem);
-            Log.i("Funcionalidade", "Nenhuma funcionalidade encontrada!");
-            Toast.makeText(context,
-                "Nenhuma funcionalidade encontrada!",
-                Toast.LENGTH_LONG).show();
         }
 
         return super.onStartCommand(intent, flags, startId);

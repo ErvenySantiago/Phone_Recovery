@@ -33,12 +33,12 @@ import javax.mail.internet.MimeMultipart;
 
 public class EmailService extends Service {
 
-//    Session session = null;
-    ProgressDialog pdialog = null;
-    Context context = null;
+    static final String TEXT_MESSAGE = "Recovery Phone \n";
+    static final String SUBJECT = "Recovery Phone";
     Properties props = null;
+    String rec;
+    String anexo;
 
-    String rec, subject, textMessage;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -56,10 +56,9 @@ public class EmailService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
 
-        rec = "leidianejuliahellen@gmail.com";
-        subject = "Teste Envio de Email";
-        textMessage = "Lilica cara de onça";
-        String anexo = intent.getStringExtra("anexo");
+        rec = intent.getStringExtra("email");
+//        subject = "Teste Envio de Email";
+        anexo = intent.getStringExtra("anexo");
 
 
 
@@ -70,7 +69,7 @@ public class EmailService extends Service {
 //        pdialog = ProgressDialog.show(context, "", "Sending Mail...", true);
 
 
-        RetreiveFeedTask task = new RetreiveFeedTask(getSession(), rec, subject, textMessage, anexo);
+        RetreiveFeedTask task = new RetreiveFeedTask(getSession(), rec, SUBJECT, TEXT_MESSAGE, anexo);
         task.start();
         return super.onStartCommand(intent, flags, startId);
     }

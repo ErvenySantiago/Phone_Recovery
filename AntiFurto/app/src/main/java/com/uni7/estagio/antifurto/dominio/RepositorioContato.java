@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 
 import com.uni7.estagio.antifurto.dominio.entidades.Contato;
@@ -74,6 +75,35 @@ public class RepositorioContato {
 
         }
         return adpContatos;
+    }
+
+    public Contato findByTelefone(String telefone){
+//        ArrayAdapter<Contato> adpContatos = new ArrayAdapter<Contato>(context, android.R.layout.simple_expandable_list_item_1);
+        Contato contato = null;
+        String selection = Contato.TELEFONE + "= '" + telefone + "'";
+        Log.i("BD param", telefone);
+        Cursor cursor = conn.query(Contato.TABELA,null,selection,null,null,null,null);
+        if (cursor.getCount()>0) {
+            cursor.moveToFirst();
+            contato = new Contato();
+            contato.setId(cursor.getLong(cursor.getColumnIndex(contato.ID)));
+            contato.setNome(cursor.getString(cursor.getColumnIndex(contato.NOME)));
+            contato.setTelefone(cursor.getString(cursor.getColumnIndex(contato.TELEFONE)));
+            contato.setEmail(cursor.getString(cursor.getColumnIndex(contato.EMAIL)));
+            contato.setPassword(cursor.getString(cursor.getColumnIndex(contato.PASSWORD)));
+        }
+
+        return contato;
+    }
+
+    public Boolean existe(String telefone){
+        Boolean existe = false;
+        Contato contato = findByTelefone(telefone);
+        if(contato != null){
+            existe = true;
+        }
+
+        return existe;
     }
 
 }
